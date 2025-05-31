@@ -46,11 +46,11 @@ _ReSharper*/
 # Visual Studio Code related (if you use it as your editor)
 .vscode/
 
-# Packages that are generally not version controlled
-Packages/
-# Except for manifest.json and packages-lock.json which are essential
-!Packages/manifest.json
-!Packages/packages-lock.json
+# # Packages that are generally not version controlled
+# Packages/
+# # Except for manifest.json and packages-lock.json which are essential
+# !Packages/manifest.json
+# !Packages/packages-lock.json
 
 # User specific project settings
 ProjectSettings/UserSettings/
