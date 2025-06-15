@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public int maxHealth = 3;
     public Animator animator;
     public Rigidbody2D rd;
     public float jumpHeight = 5f;
@@ -13,12 +14,17 @@ public class Player : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        rd = this.GetComponent<Rigidbody2D>();
+        animator = this.GetComponent<Animator>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (maxHealth <= 0)
+        {
+            Die();
+        }
         movement = Input.GetAxis("Horizontal");
         if (movement < 0 && facingRight)
         {
@@ -65,5 +71,18 @@ public class Player : MonoBehaviour
             isGrounded = true;
             animator.SetBool("Jump", false);
         }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (maxHealth <= 0)
+        {
+            return;
+        }
+        maxHealth -= damage;
+    }
+    void Die()
+    {
+
     }
 }
