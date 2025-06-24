@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - Ground
+  - Mule
+  - Coin
+  - Audio
   layers:
   - Default
   - TransparentFX
@@ -12,9 +15,9 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
+  - 'Ground '
+  - Player
+  - Enermy
   - 
   - 
   - 
@@ -47,6 +50,9 @@ TagManager:
     locked: 0
   - name: 1
     uniqueID: 789201755
+    locked: 0
+  - name: 0.5
+    uniqueID: 20332829
     locked: 0
   - name: Default
     uniqueID: 0
