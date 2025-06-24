@@ -6,7 +6,9 @@ using UnityEngine.UI;
 public class CollisionController : MonoBehaviour
 {
     public GameObject gameOverPanel;
-    public CanvasGroup gameOverCanvasGroup; 
+    public CanvasGroup gameOverCanvasGroup;
+    public GameObject gameWinPanel; 
+    public CanvasGroup gameWinCanvasGroup;
     public float fadeDuration = 1.0f;
 
     private void Start()
@@ -18,10 +20,22 @@ public class CollisionController : MonoBehaviour
         if (gameOverCanvasGroup != null)
         {
             gameOverCanvasGroup.alpha = 0;
-            gameOverCanvasGroup.interactable = false; 
+            gameOverCanvasGroup.interactable = false;
             gameOverCanvasGroup.blocksRaycasts = false;
         }
-        Time.timeScale = 1f; 
+
+        if (gameWinPanel != null)
+        {
+            gameWinPanel.SetActive(false);
+        }
+        if (gameWinCanvasGroup != null)
+        {
+            gameWinCanvasGroup.alpha = 0;
+            gameWinCanvasGroup.interactable = false;
+            gameWinCanvasGroup.blocksRaycasts = false;
+        }
+
+        Time.timeScale = 1f;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -34,15 +48,29 @@ public class CollisionController : MonoBehaviour
 
     public void GameOver()
     {
-
         if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(true); 
-        }
+            gameOverPanel.SetActive(true);
+
+        AudioManager audioManager = FindFirstObjectByType<AudioManager>();
+        if (audioManager != null)
+            audioManager.PlayDieSFX();
 
         if (gameOverCanvasGroup != null)
-        {
             StartCoroutine(FadeInGameOverScreen());
+        else
+            Time.timeScale = 0f;
+    }
+
+    public void GameWin()
+    {
+        if (gameWinPanel != null)
+        {
+            gameWinPanel.SetActive(true); 
+        }
+
+        if (gameWinCanvasGroup != null)
+        {
+            StartCoroutine(FadeInGameWinScreen());
         }
         else
         {
@@ -50,11 +78,31 @@ public class CollisionController : MonoBehaviour
         }
     }
 
+    IEnumerator FadeInGameWinScreen()
+    {
+        float timer = 0f;
+        float startAlpha = gameWinCanvasGroup.alpha;
+        float targetAlpha = 1.0f;
+
+        while (timer < fadeDuration)
+        {
+            timer += Time.unscaledDeltaTime;
+            gameWinCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, timer / fadeDuration);
+            yield return null;
+        }
+        gameWinCanvasGroup.alpha = targetAlpha;
+
+        Time.timeScale = 0f; 
+        gameWinCanvasGroup.interactable = true; 
+        gameWinCanvasGroup.blocksRaycasts = true; 
+    }
+
+
     IEnumerator FadeInGameOverScreen()
     {
         float timer = 0f;
         float startAlpha = gameOverCanvasGroup.alpha;
-        float targetAlpha = 1.0f; 
+        float targetAlpha = 1.0f;
 
         while (timer < fadeDuration)
         {
@@ -64,14 +112,14 @@ public class CollisionController : MonoBehaviour
         }
         gameOverCanvasGroup.alpha = targetAlpha;
 
-        Time.timeScale = 0f; 
-        gameOverCanvasGroup.interactable = true; 
-        gameOverCanvasGroup.blocksRaycasts = true; 
+        Time.timeScale = 0f;
+        gameOverCanvasGroup.interactable = true;
+        gameOverCanvasGroup.blocksRaycasts = true;
     }
 
     public void RestartGame()
     {
-        Time.timeScale = 1f; 
+        Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

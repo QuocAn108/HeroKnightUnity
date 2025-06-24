@@ -17,13 +17,14 @@ public class PetrolEnermy : MonoBehaviour
     public Transform attackPoint;
     public float attackRadius = 1f;
     public LayerMask attackLayer;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    private AudioManager audioManager;
+
     void Start()
     {
-
+        audioManager = FindFirstObjectByType<AudioManager>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (maxHealth <= 0)
@@ -75,30 +76,34 @@ public class PetrolEnermy : MonoBehaviour
                 facingLeft = true;
             }
         }
-
     }
 
     public void Attack()
     {
+        if (audioManager != null)
+        {
+            audioManager.PlaySwordSFX();
+        }
+
         Collider2D collInfo = Physics2D.OverlapCircle(attackPoint.position, attackRadius, attackLayer);
         if (collInfo)
         {
-            if(collInfo.gameObject.GetComponent<Player>() != null)
+            if (collInfo.gameObject.GetComponent<Player>() != null)
             {
                 collInfo.gameObject.GetComponent<Player>().TakeDamage(1);
             }
-
         }
     }
+
     public void TakeDamage(int damage)
     {
-       
         if (maxHealth <= 0)
         {
             return;
         }
         maxHealth -= damage;
     }
+
     private void OnDrawGizmosSelected()
     {
         if (checkPoint == null)
@@ -113,6 +118,7 @@ public class PetrolEnermy : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
     }
+
     void Die()
     {
         Destroy(this.gameObject);

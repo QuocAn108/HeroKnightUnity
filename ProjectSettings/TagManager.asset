@@ -7,6 +7,7 @@ TagManager:
   - Ground
   - Mule
   - Coin
+  - Audio
   layers:
   - Default
   - TransparentFX

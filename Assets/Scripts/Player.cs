@@ -18,40 +18,34 @@ public class Player : MonoBehaviour
     public float attackRadius = 1f;
     public LayerMask attackLayer;
     public CollisionController collisionController;
+    public AudioManager audioManager;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rd = this.GetComponent<Rigidbody2D>();
         animator = this.GetComponent<Animator>();
 
-        // Sử dụng FindFirstObjectByType để tránh cảnh báo lỗi obsolete
         collisionController = FindFirstObjectByType<CollisionController>();
         if (collisionController == null)
         {
             Debug.LogError("CollisionController not found in the scene! Game Over screen might not work correctly.");
         }
-
-        // Cập nhật UI ban đầu
+        audioManager = FindFirstObjectByType<AudioManager>();
         coinText.text = currentCoin.ToString();
         health.text = maxHealth.ToString();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // Kiểm tra máu và gọi Die nếu cần
         if (maxHealth <= 0)
         {
             Die();
-            return; // Quan trọng: Thoát khỏi Update để ngăn các hành động khác sau khi chết
+            return;
         }
 
-        // Cập nhật UI mỗi frame
         coinText.text = currentCoin.ToString();
         health.text = maxHealth.ToString();
 
-        // Xử lý di chuyển
         movement = Input.GetAxis("Horizontal");
         if (movement < 0 && facingRight)
         {
@@ -64,7 +58,6 @@ public class Player : MonoBehaviour
             facingRight = true;
         }
 
-        // Xử lý nhảy
         if (Input.GetKey(KeyCode.Space) && isGrounded)
         {
             Jump();
@@ -72,7 +65,6 @@ public class Player : MonoBehaviour
             animator.SetBool("Jump", true);
         }
 
-        // Xử lý animation chạy
         if (Mathf.Abs(movement) > 0)
         {
             animator.SetFloat("Run", 1);
@@ -82,8 +74,7 @@ public class Player : MonoBehaviour
             animator.SetFloat("Run", 0);
         }
 
-        // Xử lý tấn công
-        if (Input.GetKeyDown(KeyCode.DownArrow)) // Sử dụng GetKeyDown để chỉ kích hoạt một lần khi nhấn phím
+        if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             animator.SetTrigger("Attack");
         }
@@ -99,7 +90,6 @@ public class Player : MonoBehaviour
         rd.AddForce(new Vector2(0, jumpHeight), ForceMode2D.Impulse);
     }
 
-    // Xử lý va chạm vật lý (ví dụ: với Ground)
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
@@ -109,20 +99,19 @@ public class Player : MonoBehaviour
         }
     }
 
-    // Hàm tấn công của người chơi (được gọi từ Animation Event)
     public void Attack()
     {
         Collider2D collInfo = Physics2D.OverlapCircle(attackPoint.position, attackRadius, attackLayer);
         if (collInfo)
         {
-            PetrolEnermy enemy = collInfo.gameObject.GetComponent<PetrolEnermy>(); // Lấy component PetrolEnermy
-
+            PetrolEnermy enemy = collInfo.gameObject.GetComponent<PetrolEnermy>();
             if (enemy != null)
             {
                 enemy.TakeDamage(1);
             }
-          
         }
+        if (audioManager != null)
+            audioManager.PlaySwordSFX();
     }
 
     private void OnDrawGizmosSelected()
@@ -135,7 +124,6 @@ public class Player : MonoBehaviour
         Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
     }
 
-    // Hàm nhận sát thương của người chơi
     public void TakeDamage(int damage)
     {
         if (maxHealth <= 0)
@@ -145,50 +133,62 @@ public class Player : MonoBehaviour
         maxHealth -= damage;
     }
 
-    // Xử lý va chạm Trigger (ví dụ: với Coin)
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Coin"))
         {
             currentCoin++;
+            if (audioManager != null)
+            {
+                audioManager.PlaySFX();
+            }
 
-            // Tìm Animator trên đối tượng con của đồng xu
+            if (currentCoin >= 10)
+            {
+                if (collisionController != null)
+                {
+                    collisionController.GameWin();
+                }
+                if (audioManager != null)
+                {
+                    audioManager.PlayWinSFX();
+                }
+                this.enabled = false;
+            }
+
             Animator coinAnimator = collision.gameObject.GetComponentInChildren<Animator>();
-
             if (coinAnimator != null)
             {
                 coinAnimator.SetTrigger("Collected");
-
-                // Vô hiệu hóa Collider của đồng xu để không nhặt lại được
                 Collider2D coinCollider = collision.gameObject.GetComponent<Collider2D>();
                 if (coinCollider != null)
                 {
                     coinCollider.enabled = false;
                 }
-                // Vô hiệu hóa Sprite Renderer của đồng xu (tùy chọn) để nó biến mất ngay lập tức hoặc sau animation
                 SpriteRenderer coinRenderer = collision.gameObject.GetComponent<SpriteRenderer>();
                 if (coinRenderer != null)
                 {
                     coinRenderer.enabled = false;
                 }
-
-                Destroy(collision.gameObject, 0.5f); // 0.5 giây là thời gian giả định cho animation chạy hết
+                Destroy(collision.gameObject, 0.5f);
             }
             else
             {
-                Destroy(collision.gameObject); // Hủy ngay lập tức nếu không có animation
+                Destroy(collision.gameObject);
             }
         }
     }
 
-    // Hàm chết của người chơi
     void Die()
     {
         if (collisionController != null)
         {
-            collisionController.GameOver(); 
+            collisionController.GameOver();
         }
-        // Vô hiệu hóa script điều khiển người chơi
+        if (audioManager != null)
+        {
+            audioManager.PlayDieSFX();
+        }
         this.enabled = false;
     }
 }
