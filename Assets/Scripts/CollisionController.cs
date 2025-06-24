@@ -32,7 +32,7 @@ public class CollisionController : MonoBehaviour
         }
     }
 
-    void GameOver()
+    public void GameOver()
     {
 
         if (gameOverPanel != null)

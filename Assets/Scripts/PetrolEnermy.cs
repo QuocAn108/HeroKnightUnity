@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PetrolEnermy : MonoBehaviour
 {
+    public int maxHealth = 5;
     public bool facingLeft = true;
     public float moveSpeed = 2f;
     public Transform checkPoint;
@@ -25,6 +26,10 @@ public class PetrolEnermy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (maxHealth <= 0)
+        {
+            Die();
+        }
         if (Vector2.Distance(transform.position, player.position) <= attackRange)
         {
             inRange = true;
@@ -85,6 +90,15 @@ public class PetrolEnermy : MonoBehaviour
 
         }
     }
+    public void TakeDamage(int damage)
+    {
+       
+        if (maxHealth <= 0)
+        {
+            return;
+        }
+        maxHealth -= damage;
+    }
     private void OnDrawGizmosSelected()
     {
         if (checkPoint == null)
@@ -98,5 +112,9 @@ public class PetrolEnermy : MonoBehaviour
         if (attackPoint == null) return;
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
+    }
+    void Die()
+    {
+        Destroy(this.gameObject);
     }
 }
